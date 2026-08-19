@@ -35,6 +35,7 @@ summary_api = api_view(services.summary)
 trend_api = api_view(services.trend)
 top_products_api = api_view(services.top_products)
 store_comparison_api = api_view(services.store_comparison)
+radar_api = api_view(services.radar)
 
 
 @require_http_methods(["POST"])

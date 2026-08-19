@@ -74,3 +74,18 @@ def store_comparison(filters):
     return [{"store_id": row["store__external_id"], "store_name": row["store__name"],
              "category": row["store__category"], "revenue": float(row["revenue"]), "orders": row["orders"],
              "aov": float(row["revenue"] / row["orders"]) if row["orders"] else None} for row in rows]
+
+
+def radar(filters):
+    points = trend(filters)
+    if not points:
+        return {"headline": "所选区间暂无有效销售数据", "signals": []}
+    recent = points[-7:]
+    best = max(recent, key=lambda item: item["revenue"])
+    stores = store_comparison(filters)
+    signals = [{"level": "positive", "title": "近期高点",
+                "detail": f'{best["date"]} 营业额达到 ¥{best["revenue"]:,.2f}'}]
+    if stores:
+        signals.append({"level": "info", "title": "领先门店",
+                        "detail": f'{stores[0]["store_name"]}贡献 ¥{stores[0]["revenue"]:,.2f}'})
+    return {"headline": "今日经营雷达已基于真实聚合数据更新", "signals": signals}
