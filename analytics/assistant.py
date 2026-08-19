@@ -5,7 +5,8 @@ from decimal import Decimal
 
 from django.db.models import Count, Sum
 
-from analytics.models import AssistantMessage, Product, Sale
+from analytics import llm
+from analytics.models import Product, Sale
 
 MONTHS = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9,
           "十": 10, "十一": 11, "十二": 12}
@@ -90,11 +91,19 @@ def render(tool, evidence):
 
 
 def answer(question, session):
-    planned = plan(question, session)
+    context = previous_context(session)
+    remote_plan = llm.request_plan(question, context)
+    planned = remote_plan or plan(question, session)
+    mode = "deepseek" if remote_plan else "local"
     if planned["tool"] == "unsupported":
         text, status = render("unsupported", {"result": None})
-        return text, {"tool": "unsupported", "filters": {}, "result": None}, status
-    payload = execute(planned)
+        return text, {"tool": "unsupported", "filters": {}, "result": None}, status, "local"
+    try:
+        payload = execute(planned)
+    except (KeyError, TypeError, ValueError):
+        planned = plan(question, session)
+        payload = execute(planned) if planned["tool"] != "unsupported" else {"filters": {}, "result": None}
+        mode = "local"
     evidence = {"tool": planned["tool"], **payload}
     text, status = render(planned["tool"], evidence)
-    return text, evidence, status
+    return text, evidence, status, mode

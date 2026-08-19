@@ -52,9 +52,9 @@ def chat(request):
         question = str(payload.get("question", "")).strip()
         if not question:
             raise ValueError("问题不能为空")
-        answer, evidence, status = assistant.answer(question, session)
+        answer, evidence, status, mode = assistant.answer(question, session)
         message = AssistantMessage.objects.create(session=session, question=question, answer=answer,
-                                                  evidence=evidence, mode="local")
+                                                  evidence=evidence, mode=mode)
         return envelope({"answer": answer, "evidence": evidence, "status": status, "mode": message.mode,
                          "dashboard_filters": evidence.get("filters", {})}, trace_id)
     except (ValueError, AssistantSession.DoesNotExist, json.JSONDecodeError):

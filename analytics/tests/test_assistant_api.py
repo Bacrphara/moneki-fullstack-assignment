@@ -2,11 +2,12 @@ import json
 from datetime import date
 from decimal import Decimal
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from analytics.models import ImportBatch, Product, Sale, Store
 
 
+@override_settings(DEEPSEEK_API_KEY="")
 class AssistantApiTests(TestCase):
     @classmethod
     def setUpTestData(cls):
