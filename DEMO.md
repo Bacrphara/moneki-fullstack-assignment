@@ -1,5 +1,7 @@
 # 演示脚本（约 2 分钟）
 
+初版 Demo 通过开源项目 OpenMinis 在 iOS 的 iSH 环境完成；导入电脑后使用 Codex 继续处理 Django Admin 安全、UI/交互和功能联调。演示重点是可信 AI 问答及其与真实数据库、看板的联动，不将当前页面描述为完整的传统表格式 BI 产品。
+
 ## 1. 看板与数据质量
 
 1. 执行 `python manage.py import_sales`，展示重复执行会跳过同一 SHA-256 批次。
