@@ -1,10 +1,11 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path
 
 from analytics import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(f"{settings.ADMIN_PATH}/", admin.site.urls),
     path("", views.dashboard, name="dashboard"),
     path("health/", views.health, name="health"),
     path("api/dashboard/summary", views.summary_api),
