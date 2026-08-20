@@ -2,12 +2,16 @@ import json
 import uuid
 
 from django.db import connection
-from django.http import JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from analytics import assistant, services
 from analytics.models import AssistantMessage, AssistantSession
+
+
+def hidden_admin(request):
+    return HttpResponseNotFound("页面不存在")
 
 
 def dashboard(request):

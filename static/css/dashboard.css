@@ -14,7 +14,7 @@
 .assistant-status[hidden]{display:none}
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#chat button:disabled,#chat input:disabled{cursor:wait;opacity:.7}
+#chat button:disabled,#assistant-question:disabled{cursor:wait;opacity:.7}
 .bot.error{border:1px solid #f0aa8c;background:#784637}
 .retry,.sync{margin-top:10px;padding:7px 10px;border:1px solid rgba(255,255,255,.4);border-radius:8px;background:transparent;color:white;cursor:pointer}
 .evidence{display:block;font-size:12px;color:#d8e5e1;margin-top:10px;border-top:1px solid rgba(255,255,255,.18);padding-top:9px}

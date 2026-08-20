@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 
 class PageAndHealthTests(TestCase):
@@ -22,15 +22,19 @@ class PageAndHealthTests(TestCase):
         response = browser.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertIn("csrftoken", browser.cookies)
+        self.assertContains(response, 'id="assistant-question"')
 
     def test_health_checks_database(self):
         response = self.client.get("/health/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["database"], "ok")
 
+    @override_settings(DEBUG=True)
     def test_admin_uses_configured_non_default_path(self):
         self.assertRegex(settings.ADMIN_PATH, r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8}$")
-        self.assertEqual(self.client.get("/admin/").status_code, 404)
+        default_response = self.client.get("/admin/")
+        self.assertEqual(default_response.status_code, 404)
+        self.assertNotContains(default_response, settings.ADMIN_PATH, status_code=404)
         response = self.client.get(f"/{settings.ADMIN_PATH}/")
         self.assertEqual(response.status_code, 302)
         self.assertIn(f"/{settings.ADMIN_PATH}/login/", response.url)

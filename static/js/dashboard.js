@@ -83,7 +83,7 @@ async function ensureSession() {
 function setAssistantBusy(busy) {
   assistantBusy = busy;
   $("#assistant-status").hidden = !busy;
-  $("#chat input").disabled = busy;
+  $("#assistant-question").disabled = busy;
   $("#chat button").disabled = busy;
   $("#chat button").textContent = busy ? "查询中…" : "发送";
 }
