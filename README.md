@@ -35,12 +35,14 @@ CSV ──> 幂等 import_sales ──> 质量审计批次 ──> SQLite
 
 ## 可信 AI
 
-模型不能执行 SQL。它只能选择 `query_product_revenue`、`query_revenue_by_store_category`、`query_aov_trend` 等白名单工具；Django 校验参数并用 ORM 聚合。页面展示工具、筛选条件、结果和执行模式。网络失败、非法 JSON 或未知工具最多重试三次后降级；数据集外问题明确拒答。
+模型不能执行 SQL。它只能选择 `query_product_revenue`、`query_revenue_by_store_category`、`query_aov_trend` 等白名单工具；Django 校验参数并用 ORM 聚合。经营助手位于首屏，请求期间会显示“正在查询真实数据…”并阻止重复提交；失败时保留问题并提供重试。回答中的“查看数据依据”会展示工具、执行模式、筛选条件、聚合结果和请求追踪 ID。网络失败、非法 JSON 或未知工具最多重试三次后降级；数据集外问题明确拒答。
 
 ```env
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-flash
 ```
+
+当前没有实现流式输出；加载状态会明确告知查询仍在进行，最终答案一次性呈现。这是第三关可继续扩展的任选项，不影响真实数据库取数链路。
 
 ## 测试
 
@@ -69,6 +71,10 @@ docker run --rm -p 8000:8000 --env-file .env -v moneki-data:/data moneki-dashboa
 ```
 
 SQLite 位于持久卷 `/data`。入口脚本会幂等执行迁移、数据导入和静态资源收集。作业开发环境为 iSH，未提供 Docker daemon，因此镜像配置经过静态检查但未在本机实际构建。
+
+## 后台管理入口
+
+默认 `/admin/` 不暴露并返回 404。后台入口由 `DJANGO_ADMIN_PATH` 配置，必须是同时包含大小写字母和数字的 8 位字符串；零配置默认值见 `.env.example`。部署时应覆盖为新的随机值。隐藏路径只是减少扫描噪声，不能替代管理员认证、最小权限、HTTPS 与访问审计。
 
 ## 生产注意
 

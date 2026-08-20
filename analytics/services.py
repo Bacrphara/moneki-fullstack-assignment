@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.db.models import Count, Sum
+from django.db.models import Count, Max, Min, Sum
 
 from analytics.models import Sale
 
@@ -16,7 +16,7 @@ class Filters:
 
 
 def parse_filters(params) -> Filters:
-    bounds = Sale.objects.aggregate(start=models_min("date"), end=models_max("date"))
+    bounds = Sale.objects.aggregate(start=Min("date"), end=Max("date"))
     latest = bounds["end"] or date.today()
     try:
         start = date.fromisoformat(params.get("start")) if params.get("start") else latest - timedelta(days=29)
@@ -26,17 +26,6 @@ def parse_filters(params) -> Filters:
     if start > end:
         raise ValueError("开始日期不能晚于结束日期")
     return Filters(start, end, params.get("store_id", ""), params.get("product_id", ""))
-
-
-def models_min(field):
-    from django.db.models import Min
-    return Min(field)
-
-
-def models_max(field):
-    from django.db.models import Max
-    return Max(field)
-
 
 def sales_for(filters):
     query = Sale.objects.filter(date__range=(filters.start, filters.end))
