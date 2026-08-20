@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import TestCase
+from django.test import Client, TestCase
 
 
 class PageAndHealthTests(TestCase):
@@ -9,6 +9,19 @@ class PageAndHealthTests(TestCase):
         self.assertContains(response, "今日经营雷达")
         self.assertContains(response, "问问经营助手")
         self.assertContains(response, 'name="start"')
+
+    def test_assistant_is_visible_before_metrics_and_exposes_loading_feedback(self):
+        content = self.client.get("/").content.decode()
+        self.assertLess(content.index('id="assistant"'), content.index('id="kpis"'))
+        self.assertIn('id="assistant-status"', content)
+        self.assertIn('aria-live="polite"', content)
+        self.assertIn("正在查询真实数据", content)
+
+    def test_dashboard_provides_csrf_token_for_assistant_requests(self):
+        browser = Client(enforce_csrf_checks=True)
+        response = browser.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("csrftoken", browser.cookies)
 
     def test_health_checks_database(self):
         response = self.client.get("/health/")
