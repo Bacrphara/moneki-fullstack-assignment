@@ -5,6 +5,36 @@ const money = (value) => value == null ? "—" : new Intl.NumberFormat("zh-CN", 
 
 let sessionId;
 let assistantBusy = false;
+let hasUnreadAnswer = false;
+const minimumLoadingMs = 500;
+const assistantDialog = $("#assistant-dialog");
+const messages = $("#messages");
+
+function scrollMessages() {
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  messages.scrollTo({ top: messages.scrollHeight, behavior });
+}
+
+function updateLaunchButtons() {
+  const label = assistantBusy ? "正在查询…" : hasUnreadAnswer ? "查看新回答" : "问问经营助手";
+  document.querySelectorAll(".assistant-launch").forEach((button) => {
+    button.textContent = label;
+    button.classList.toggle("has-unread", hasUnreadAnswer);
+    button.setAttribute("aria-expanded", String(assistantDialog.open));
+  });
+}
+
+function openAssistant() {
+  if (!assistantDialog.open) assistantDialog.showModal();
+  hasUnreadAnswer = false;
+  updateLaunchButtons();
+  requestAnimationFrame(scrollMessages);
+}
+
+function closeAssistant() {
+  if (assistantDialog.open) assistantDialog.close();
+  updateLaunchButtons();
+}
 
 function query() {
   return new URLSearchParams(new FormData($("#filters"))).toString();
@@ -82,18 +112,22 @@ async function ensureSession() {
 
 function setAssistantBusy(busy) {
   assistantBusy = busy;
-  $("#assistant-status").hidden = !busy;
+  const status = $("#assistant-status");
+  status.hidden = !busy;
+  if (busy) messages.append(status);
   $("#assistant-question").disabled = busy;
   $("#chat button").disabled = busy;
   $("#chat button").textContent = busy ? "查询中…" : "发送";
+  updateLaunchButtons();
+  if (busy) requestAnimationFrame(scrollMessages);
 }
 
 function addMessage(className, text) {
   const message = document.createElement("div");
   message.className = className;
   message.textContent = text;
-  $("#messages").append(message);
-  $("#messages").scrollTop = $("#messages").scrollHeight;
+  messages.append(message);
+  scrollMessages();
   return message;
 }
 
@@ -150,6 +184,7 @@ function addAnswer(data, traceId) {
     details.append(sync);
   }
   message.append(details);
+  scrollMessages();
 }
 
 function addError(question, error) {
@@ -160,11 +195,13 @@ function addError(question, error) {
   retry.textContent = "重试这次提问";
   retry.addEventListener("click", () => ask(question));
   message.append(retry);
+  scrollMessages();
 }
 
 async function ask(question) {
   if (assistantBusy || !question.trim()) return;
   addMessage("user", question);
+  const loadingStartedAt = performance.now();
   setAssistantBusy(true);
   try {
     await ensureSession();
@@ -174,8 +211,14 @@ async function ask(question) {
       body: JSON.stringify({ session_id: sessionId, question }),
     });
     const payload = await responseJson(response, "经营助手暂时无法回答，请稍后重试。");
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, minimumLoadingMs - (performance.now() - loadingStartedAt))));
     addAnswer(payload.data, payload.meta.trace_id);
+    if (!assistantDialog.open) {
+      hasUnreadAnswer = true;
+      updateLaunchButtons();
+    }
   } catch (error) {
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, minimumLoadingMs - (performance.now() - loadingStartedAt))));
     addError(question, error);
   } finally {
     setAssistantBusy(false);
@@ -199,7 +242,18 @@ $("#chat").addEventListener("submit", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  if (event.target.matches(".prompt")) ask(event.target.textContent);
+  if (event.target.matches(".assistant-launch")) openAssistant();
+  if (event.target.matches(".prompt")) {
+    event.target.classList.add("is-pressed");
+    setTimeout(() => event.target.classList.remove("is-pressed"), 350);
+    ask(event.target.textContent);
+  }
+});
+
+$("#assistant-close").addEventListener("click", closeAssistant);
+assistantDialog.addEventListener("close", updateLaunchButtons);
+assistantDialog.addEventListener("click", (event) => {
+  if (event.target === assistantDialog) closeAssistant();
 });
 
 const initial = new URLSearchParams(location.search);

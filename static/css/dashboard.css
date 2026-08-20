@@ -34,3 +34,39 @@
   .evidence dd{margin-bottom:6px}
   #chat{align-items:stretch}
 }
+
+/* 经营助手浮窗 */
+.hero-actions{display:flex;align-items:flex-end;gap:10px}
+.assistant-launch{border:0;border-radius:12px;background:var(--orange);color:white;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(81,45,31,.16)}
+.assistant-launch.has-unread{background:#b94627;box-shadow:0 0 0 4px rgba(232,103,61,.2),0 8px 24px rgba(81,45,31,.18)}
+.assistant-launch-floating{position:fixed;right:24px;bottom:24px;z-index:20}
+#assistant-dialog{width:min(760px,calc(100vw - 32px));max-height:min(780px,calc(100vh - 32px));padding:0;border:0;border-radius:20px;background:transparent;box-shadow:0 28px 80px rgba(12,30,25,.35);overflow:hidden}
+#assistant-dialog::backdrop{background:rgba(14,25,22,.58);backdrop-filter:blur(3px)}
+.assistant-modal{padding:24px;min-height:480px;display:flex;flex-direction:column}
+.assistant-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.assistant-modal-head span{color:#f4ad89;letter-spacing:.15em;font-size:11px;font-weight:800}
+.assistant-modal-head h2{margin:6px 0 0;font:700 28px/1.2 Georgia}
+.assistant-copy{margin:8px 0 14px;color:#c9d8d3}
+.assistant-close{width:40px;height:40px;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(255,255,255,.08);color:white;font-size:26px;line-height:1;cursor:pointer}
+.assistant-modal .suggestions{margin-bottom:12px}
+.assistant-modal .assistant-chat{display:flex;flex:1;min-height:0;flex-direction:column}
+.assistant-modal .messages{height:auto;min-height:240px;max-height:420px;flex:1;margin:0 0 12px;padding:4px;scroll-behavior:smooth}
+.assistant-modal .assistant-status{width:max-content;max-width:100%;margin:8px 0}
+
+.assistant-launch,.assistant-close,.prompt,#chat button,.sync,.retry,.evidence summary,.filters button,.ghost{transition:transform .12s ease,filter .12s ease,background-color .12s ease,border-color .12s ease,box-shadow .12s ease}
+.assistant-launch:hover,.assistant-close:hover,.prompt:hover,#chat button:hover,.sync:hover,.retry:hover,.filters button:hover{filter:brightness(1.08)}
+.assistant-launch:focus-visible,.assistant-close:focus-visible,.prompt:focus-visible,#chat button:focus-visible,.sync:focus-visible,.retry:focus-visible,.evidence summary:focus-visible,.filters button:focus-visible,.ghost:focus-visible{outline:3px solid #ffd1bd;outline-offset:3px}
+.assistant-launch:active,.assistant-close:active,.prompt:active,.prompt.is-pressed,#chat button:active,.sync:active,.retry:active,.filters button:active,.ghost:active{transform:scale(.97);filter:brightness(.9)}
+
+@media(max-width:780px){
+  .hero-actions{display:block}
+  .assistant-launch-hero{display:none}
+  .assistant-launch-floating{right:16px;bottom:16px;max-width:calc(100vw - 32px)}
+  #assistant-dialog{width:calc(100vw - 20px);max-height:calc(100vh - 20px);border-radius:16px}
+  .assistant-modal{min-height:min(680px,calc(100vh - 20px));padding:18px}
+  .assistant-modal .messages{min-height:220px;max-height:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}

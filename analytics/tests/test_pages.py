@@ -10,9 +10,11 @@ class PageAndHealthTests(TestCase):
         self.assertContains(response, "问问经营助手")
         self.assertContains(response, 'name="start"')
 
-    def test_assistant_is_visible_before_metrics_and_exposes_loading_feedback(self):
+    def test_assistant_uses_an_accessible_dialog_with_open_and_close_controls(self):
         content = self.client.get("/").content.decode()
-        self.assertLess(content.index('id="assistant"'), content.index('id="kpis"'))
+        self.assertIn('<dialog id="assistant-dialog"', content)
+        self.assertIn('aria-controls="assistant-dialog"', content)
+        self.assertIn('aria-label="关闭经营助手"', content)
         self.assertIn('id="assistant-status"', content)
         self.assertIn('aria-live="polite"', content)
         self.assertIn("正在查询真实数据", content)
