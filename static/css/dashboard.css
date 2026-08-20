@@ -80,6 +80,7 @@
 .empty-state{align-self:center;margin:auto;text-align:center;color:var(--muted);font-size:13px}
 #products .empty-state{padding:28px 8px}
 .filters button:disabled{cursor:wait;opacity:.72}
+.grid>*{min-width:0}
 
 /* 低高度视口：头部与输入区固定，只有消息记录滚动 */
 #assistant-dialog{height:min(780px,calc(100vh - 32px));max-height:none}
@@ -92,4 +93,6 @@
   #assistant-dialog{height:calc(100vh - 20px);max-height:none}
   .assistant-modal{height:100%;min-height:0}
   .assistant-modal .messages{min-height:0;max-height:none}
+  .chart{gap:2px}
+  .bar{min-width:1px}
 }
