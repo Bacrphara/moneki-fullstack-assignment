@@ -9,6 +9,8 @@ class PageAndHealthTests(TestCase):
         self.assertContains(response, "今日经营雷达")
         self.assertContains(response, "问问经营助手")
         self.assertContains(response, 'name="start"')
+        self.assertContains(response, 'id="dashboard-status"')
+        self.assertContains(response, "正在加载看板数据")
 
     def test_assistant_uses_an_accessible_dialog_with_open_and_close_controls(self):
         content = self.client.get("/").content.decode()

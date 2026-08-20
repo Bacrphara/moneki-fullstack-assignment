@@ -52,6 +52,7 @@ class AssistantApiTests(TestCase):
         aov = self.ask(session, "客单价最近是涨了还是跌了？").json()["data"]
         self.assertEqual(aov["evidence"]["tool"], "query_aov_trend")
         self.assertIn("上涨", aov["answer"])
+        self.assertEqual(aov["dashboard_filters"], {"start": "2026-06-01", "end": "2026-07-31"})
 
     def test_unknown_question_refuses_instead_of_inventing(self):
         data = self.ask(self.create_session(), "明天会下雨吗？").json()["data"]

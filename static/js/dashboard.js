@@ -6,7 +6,9 @@ const money = (value) => value == null ? "—" : new Intl.NumberFormat("zh-CN", 
 let sessionId;
 let assistantBusy = false;
 let hasUnreadAnswer = false;
+let dashboardRequestId = 0;
 const minimumLoadingMs = 500;
+const dashboardMinimumLoadingMs = 500;
 const assistantDialog = $("#assistant-dialog");
 const messages = $("#messages");
 
@@ -56,12 +58,41 @@ async function get(path) {
   return (await responseJson(response, "数据请求失败，请稍后重试。")).data;
 }
 
+function setDashboardStatus(state, message) {
+  const status = $("#dashboard-status");
+  status.className = `dashboard-status is-${state}`;
+  status.querySelector(".spinner").hidden = state !== "loading";
+  status.querySelector("span").textContent = message;
+  const button = $("#filters button");
+  button.disabled = state === "loading";
+  button.textContent = state === "loading" ? "更新中…" : "更新看板";
+}
+
+function renderEmptyDashboard() {
+  const emptyChart = document.createElement("p");
+  emptyChart.className = "empty-state";
+  emptyChart.textContent = "所选日期暂无营业额趋势";
+  $("#chart").replaceChildren(emptyChart);
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.colSpan = 4;
+  cell.className = "empty-state";
+  cell.textContent = "所选日期暂无商品销售记录";
+  row.append(cell);
+  $("#products").replaceChildren(row);
+}
+
 async function load() {
+  const requestId = ++dashboardRequestId;
+  const loadingStartedAt = performance.now();
+  setDashboardStatus("loading", "正在加载看板数据…");
   try {
     const [summary, trend, products, radar] = await Promise.all([
       get("/api/dashboard/summary"), get("/api/dashboard/trend"),
       get("/api/dashboard/top-products"), get("/api/insights/radar"),
     ]);
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, dashboardMinimumLoadingMs - (performance.now() - loadingStartedAt))));
+    if (requestId !== dashboardRequestId) return;
     $("#revenue").textContent = money(summary.revenue);
     $("#orders").textContent = summary.orders.toLocaleString();
     $("#aov").textContent = money(summary.aov);
@@ -93,8 +124,19 @@ async function load() {
       signal.append(title, detail);
       return signal;
     }));
+    if (!trend.length) {
+      renderEmptyDashboard();
+      setDashboardStatus("empty", "所选日期暂无销售数据，请调整日期范围后重试。");
+    } else {
+      const filters = new FormData($("#filters"));
+      const range = filters.get("start") && filters.get("end") ? ` · ${filters.get("start")} 至 ${filters.get("end")}` : " · 默认最近 30 天";
+      setDashboardStatus("success", `看板已更新${range}`);
+    }
   } catch (error) {
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, dashboardMinimumLoadingMs - (performance.now() - loadingStartedAt))));
+    if (requestId !== dashboardRequestId) return;
     $("#radar-head").textContent = error.message;
+    setDashboardStatus("error", `${error.message} 请检查日期或稍后重试。`);
   }
 }
 
@@ -179,6 +221,8 @@ function addAnswer(data, traceId) {
       const filters = data.dashboard_filters || {};
       if (filters.start?.length === 10) $("[name=start]").value = filters.start;
       if (filters.end?.length === 10) $("[name=end]").value = filters.end;
+      history.replaceState(null, "", `?${query()}`);
+      closeAssistant();
       load();
     });
     details.append(sync);

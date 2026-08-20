@@ -69,7 +69,10 @@ def execute(plan):
             values = Sale.objects.filter(date__range=(start, end)).aggregate(revenue=Sum("amount"), orders=Count("order_id", distinct=True))
             periods.append({"month": month.strftime("%Y-%m"), "aov": float(values["revenue"] / values["orders"])})
         change = periods[1]["aov"] - periods[0]["aov"]
-        return {"filters": {"start": periods[0]["month"], "end": periods[1]["month"]}, "result": {"periods": periods, "change": change}}
+        range_start, _ = month_range(months[-1].year, months[-1].month)
+        _, range_end = month_range(months[0].year, months[0].month)
+        return {"filters": {"start": range_start.isoformat(), "end": range_end.isoformat()},
+                "result": {"periods": periods, "change": change}}
     return {"filters": {}, "result": None}
 
 

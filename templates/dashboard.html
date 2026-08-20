@@ -3,6 +3,7 @@
 <title>经营罗盘 · 门店数据工作台</title><link rel="stylesheet" href="{% static 'css/dashboard.css' %}"></head>
 <body><header class="topbar"><a class="brand" href="/"><span>MONĒKI</span><strong>经营罗盘</strong></a><div class="status"><i></i> 数据已审计 · 上海时区</div></header>
 <main><section class="hero"><div><p class="eyebrow">OPERATIONS OVERVIEW</p><h1>把每一笔生意，<em>看得更清楚。</em></h1><p>五家门店的经营脉搏，真实数据驱动，不靠猜测。</p></div><div class="hero-actions"><button class="assistant-launch assistant-launch-hero" type="button" aria-controls="assistant-dialog">问问经营助手</button><form id="filters" class="filters"><label>开始日期<input type="date" name="start"></label><label>结束日期<input type="date" name="end"></label><button>更新看板</button></form></div></section>
+<div id="dashboard-status" class="dashboard-status is-loading" role="status" aria-live="polite"><i class="spinner" aria-hidden="true"></i><span>正在加载看板数据…</span></div>
 <section id="kpis" class="kpis"><article><span>营业额</span><strong id="revenue">—</strong><small>有效销售明细</small></article><article><span>订单数</span><strong id="orders">—</strong><small>去重订单号</small></article><article><span>客单价</span><strong id="aov">—</strong><small>营业额 ÷ 订单数</small></article></section>
 <section class="grid"><article class="panel trend"><div class="panel-head"><div><span>营业额趋势</span><h2>每日经营节奏</h2></div><button class="ghost" data-range="all">查看全时段</button></div><div id="chart" class="chart" aria-label="营业额趋势图"></div></article>
 <article class="panel radar"><span>今日经营雷达</span><h2 id="radar-head">正在读取经营信号…</h2><div id="signals"></div></article></section>

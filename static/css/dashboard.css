@@ -70,3 +70,26 @@
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+
+/* 看板请求状态与空数据反馈 */
+.dashboard-status{display:flex;align-items:center;gap:9px;min-height:42px;margin:0 0 16px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--muted);font-size:13px}
+.dashboard-status .spinner{flex:0 0 auto;border-color:rgba(25,89,74,.25);border-top-color:var(--green)}
+.dashboard-status.is-success{border-color:#b9d8cd;color:var(--green);background:#eef7f3}
+.dashboard-status.is-empty{border-color:#e8c5a9;color:#7b4a2c;background:#fff6ed}
+.dashboard-status.is-error{border-color:#e2aaa0;color:#8a3325;background:#fff0ed}
+.empty-state{align-self:center;margin:auto;text-align:center;color:var(--muted);font-size:13px}
+#products .empty-state{padding:28px 8px}
+.filters button:disabled{cursor:wait;opacity:.72}
+
+/* 低高度视口：头部与输入区固定，只有消息记录滚动 */
+#assistant-dialog{height:min(780px,calc(100vh - 32px));max-height:none}
+.assistant-modal{height:100%;min-height:0}
+.assistant-modal-head,.assistant-copy,.assistant-modal .suggestions,#chat{flex:0 0 auto}
+.assistant-modal .assistant-chat{min-height:0}
+.assistant-modal .messages{min-height:0;max-height:none;overflow-y:auto}
+
+@media(max-width:780px){
+  #assistant-dialog{height:calc(100vh - 20px);max-height:none}
+  .assistant-modal{height:100%;min-height:0}
+  .assistant-modal .messages{min-height:0;max-height:none}
+}
